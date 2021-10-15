@@ -78,7 +78,7 @@ function buildVariableString(variables: {[key:string]: string} | undefined): str
     return '';
   }
   return Object.keys(variables).map(vname => {
-    return `const ${vname} = ${variables[vname]}`;
+    return `    const ${vname} = ${variables[vname]};\n`;
   }).join('\n');
 }
 
@@ -101,10 +101,19 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 }
 
 export function buildCode(tag: Tag, css: CssStyle): string {
+  const variables = getAllVariables(tag);
   return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.VFC = () => {
-    ${buildVariableString(tag.variables)}
+${buildVariableString(variables)}
   return (
 ${buildJsxString(tag, css, 0)}
   )
 }`
+}
+
+function getAllVariables(tag: Tag): {[key: string]: string} {
+  const v  = {...tag.variables};
+  if(tag.children) {
+    tag.children.forEach(c => Object.assign(v, getAllVariables(c)));
+  }
+  return v;
 }

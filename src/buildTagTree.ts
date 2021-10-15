@@ -62,11 +62,13 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
     if(paddingTop !== 0) {
       stackTokens.paddingTop = paddingTop;
     }
+    
+    const nodeName = node.name.replaceAll(' ', '');
+    properties.push({name: 'tokens', value: `${nodeName}StackTokens`, notStringValue: true});
+    variables[`${nodeName}StackTokens`] =JSON.stringify(stackTokens);
 
     if (node.layoutMode === 'HORIZONTAL') {
       properties.push({ name: 'horizontal', value: null});
-      properties.push({name: 'tokens', value: 'stackTokens', notStringValue: true});
-      variables['stackTokens'] =JSON.stringify(stackTokens);
     }
   }
 
