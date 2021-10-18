@@ -78,7 +78,7 @@ function buildVariableString(variables: {[key:string]: string} | undefined): str
     return '';
   }
   return Object.keys(variables).map(vname => {
-    return `    const ${vname} = ${variables[vname]};\n`;
+    return `  const ${vname} = ${variables[vname]}\n`;
   }).join('\n');
 }
 

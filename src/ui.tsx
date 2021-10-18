@@ -124,7 +124,7 @@ const App: React.VFC = () => {
         </div>
       </div>
 
-      <div className={styles.settings}>
+      {/* <div className={styles.settings}>
         <h2 className={styles.heading}>Settings</h2>
 
         <Spacer axis="vertical" size={12} />
@@ -157,7 +157,7 @@ const App: React.VFC = () => {
           onDelete={onDeleteUserComponentSetting}
           onUpdate={onUpdateUserComponentSetting}
         />
-      </div>
+      </div> */}
     </div>
   )
 }

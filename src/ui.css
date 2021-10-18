@@ -63,7 +63,7 @@ input {
   color: #5497c3;
   white-space: pre-wrap;
 
-  max-height: 240px;
+  max-height: 80%;
   overflow: auto;
 }
 

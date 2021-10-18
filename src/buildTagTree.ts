@@ -2,7 +2,8 @@ import { UnitType } from './buildSizeStringByUnit'
 import { FluentComponentType } from './fluentTypes'
 import { CSSData, getCssDataForTag } from './getCssDataForTag'
 import { isImageNode } from './utils/isImageNode'
-import { kebabize } from './utils/stringUtils'
+import { capitalizeFirstLetter, kebabize, smallCamel } from './utils/stringUtils'
+import * as JSON5 from 'json5'
 
 type Property = {
   name: string
@@ -62,10 +63,14 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
     if(paddingTop !== 0) {
       stackTokens.paddingTop = paddingTop;
     }
-    
-    const nodeName = node.name.replaceAll(' ', '');
-    properties.push({name: 'tokens', value: `${nodeName}StackTokens`, notStringValue: true});
-    variables[`${nodeName}StackTokens`] =JSON.stringify(stackTokens);
+
+    const tokensStringValue = JSON5.stringify(stackTokens, null, 4).replace('}', '  }')
+    if (tokensStringValue !== '{  }') {
+      const nodeName = node.name.replaceAll(' ', '');
+      const tokensVarName = smallCamel(`${nodeName}StackTokens`)
+      properties.push({name: 'tokens', value: tokensVarName, notStringValue: true});
+      variables[tokensVarName] = tokensStringValue
+    }
 
     if (node.layoutMode === 'HORIZONTAL') {
       properties.push({ name: 'horizontal', value: null});
@@ -188,7 +193,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
     if (node.name === 'ChoiceGroup') {
       fluentType = FluentComponentType.ChoiceGroup
       parseFigmaText(childTags, 'Label', properties, 'label')
-      parseFigmaNestedItems(childTags, properties, 'options')
+      parseFigmaNestedItems(childTags, properties, 'options', node.name, variables)
       childTags = []
     }
 
@@ -223,7 +228,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
         parseFigmaVariant(facepileOverflowNode as InstanceNode, 'Type', 'More', properties, 'overflowButtonType', 'OverflowButtonType.more', true)
       }
 
-      parseFigmaNestedItems(childTags.find(child => child.name === 'Flex-container')?.children ?? [], properties, 'personas')
+      parseFigmaNestedItems(childTags.find(child => child.name === 'Flex-container')?.children ?? [], properties, 'personas', node.name, variables)
 
       childTags = []
     }
@@ -322,20 +327,23 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name.includes('DetailsList')) {
       fluentType = FluentComponentType.DetailsList
-      parseFigmaList(node, childTags, properties)
+      parseFigmaList(node, childTags, properties, variables)
       childTags = []
     }
 
     if (node.name.includes('GroupedList')) {
       fluentType = FluentComponentType.GroupedList
-      parseFigmaList(node, childTags, properties)
+      parseFigmaList(node, childTags, properties, variables)
       childTags = []
     }
 
     if (node.name.includes('Breadcrumbs')) {
       fluentType = FluentComponentType.Breadcrumb
-      properties.push({ name: 'items', value: `items`, notStringValue: true});
-      variables['items'] = `${getBreadcrumbProps(childTags)}`;
+
+      const itemsVarName = `${smallCamel(node.name)}Items`
+      properties.push({ name: 'items', value: itemsVarName, notStringValue: true})
+      variables[itemsVarName] = `${getBreadcrumbProps(childTags)}`
+
       childTags = []
     }
 
@@ -604,7 +612,7 @@ const parseFigmaText = (childTags: Tag[], childNodeName: string, properties: Pro
   }
 }
 
-const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], propName: string) => {
+const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], propName: string, nodeName: string, variables: {[key: string]: string}) => {
   const optionStrings: string[] = []
   childTags.forEach(childTag => {
     if (childTag.node.type === 'FRAME') {
@@ -616,7 +624,9 @@ const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], propNam
     }
   })
 
-  properties.push({ name: propName, value: `[${optionStrings.join(' ')}]`, notStringValue: true })
+  const itemsVarName = `${smallCamel(nodeName)}${capitalizeFirstLetter(propName)}`
+  properties.push({ name: propName, value: itemsVarName, notStringValue: true})
+  variables[itemsVarName] = `[${optionStrings.join(' ')}]`
 }
 
 const parseFigmaButton = (node: InstanceNode, properties: Property[]) => {
@@ -631,7 +641,7 @@ const parseFigmaButton = (node: InstanceNode, properties: Property[]) => {
   }
 }
 
-const parseFigmaList = (node: InstanceNode, childTags: Tag[], properties: Property[]) => {
+const parseFigmaList = (node: InstanceNode, childTags: Tag[], properties: Property[], variables: {[key: string]: string}) => {
   if (node.name.includes('Compact')) {
     properties.push({ name: 'compact', value: 'true', notStringValue: true })
   }
@@ -650,7 +660,10 @@ const parseFigmaList = (node: InstanceNode, childTags: Tag[], properties: Proper
       }
     })
   })
-  properties.push({ name: 'columns', value: `[${columnStrings.join(' ')}]`, notStringValue: true })
+
+  const itemsVarName = `${smallCamel(node.name)}Columns`
+  properties.push({ name: 'items', value: itemsVarName, notStringValue: true})
+  variables[itemsVarName] = `[${columnStrings.join(' ')}]`
 }
 
 const parseFigmaNav = (node: InstanceNode, childTags: Tag[], properties: Property[]) => {
@@ -698,5 +711,5 @@ const getBreadcrumbProps = (childTags: Tag[]): string => {
 }
 
 const getItemString = (properties: Property[]): string => {
-  return properties.length > 0 ? `{ ${properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'}, `).join('')} },` : ''
+  return properties.length > 0 ? `{ ${properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'},`).join(' ')} },` : ''
 }
