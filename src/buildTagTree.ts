@@ -74,8 +74,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       fluentType = FluentComponentType.IconButton
       const iconChild = childTags.find(childTag => childTag.isText)
       if (iconChild) {
-        // TODO: find a better solution to specify the icon name
-        properties.push({ name: 'iconProps', value: `{ iconName: 'TODO' }`, notStringValue: true })
+        properties.push({ name: 'iconProps', value: `{ iconName: '${iconChild.name}' }`, notStringValue: true })
       }
       parseFigmaButton(node, properties)
       childTags = []
@@ -656,7 +655,7 @@ const parseFigmaNav = (node: InstanceNode, childTags: Tag[], properties: Propert
 }
 
 const parseFigmaStack = (node: FrameNode, properties: Property[], variables: {[key: string]: string}) => {
-  const stackTokens: {childrenGap?: number, paddingLeft?: number, paddingRight?: number, paddingBottom?: number, paddingTop?: number } = {};
+  const stackTokens: { childrenGap?: number, paddingLeft?: number, paddingRight?: number, paddingBottom?: number, paddingTop?: number } = {};
   const {itemSpacing, paddingLeft, paddingRight, paddingBottom, paddingTop} = node;
   if(itemSpacing !== 0) {
     stackTokens.childrenGap = itemSpacing;
