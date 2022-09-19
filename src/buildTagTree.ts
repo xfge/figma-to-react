@@ -45,36 +45,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
   
   if (node.type === 'FRAME' && (node.layoutMode === 'HORIZONTAL' || node.layoutMode === 'VERTICAL')) {
     fluentType = FluentComponentType.Stack
-    const stackTokens: {childrenGap?: number, paddingLeft?: number, paddingRight?: number, paddingBottom?: number, paddingTop?: number } = {};
-    const {itemSpacing, paddingLeft, paddingRight, paddingBottom, paddingTop} = node;
-    if(itemSpacing !== 0) {
-      stackTokens.childrenGap = itemSpacing;
-    }
-
-    if(paddingLeft !== 0) {
-      stackTokens.paddingLeft = paddingLeft;
-    }
-    if(paddingRight !== 0) {
-      stackTokens.paddingRight = paddingRight;
-    }
-    if(paddingBottom !== 0) {
-      stackTokens.paddingBottom = paddingBottom;
-    }
-    if(paddingTop !== 0) {
-      stackTokens.paddingTop = paddingTop;
-    }
-
-    const tokensStringValue = JSON5.stringify(stackTokens, null, 4).replace('}', '  }')
-    if (tokensStringValue !== '{  }') {
-      const nodeName = node.name.replaceAll(' ', '');
-      const tokensVarName = smallCamel(`${nodeName}StackTokens`)
-      properties.push({name: 'tokens', value: tokensVarName, notStringValue: true});
-      variables[tokensVarName] = tokensStringValue
-    }
-
-    if (node.layoutMode === 'HORIZONTAL') {
-      properties.push({ name: 'horizontal', value: null});
-    }
+    parseFigmaStack(node, properties, variables);
   }
 
   // InstanceNode is assumed as a common component from Fluent UI
@@ -124,7 +95,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name === 'OverflowSet') {
       fluentType = FluentComponentType.OverflowSet
-      
+
       const items = childTags.map((_, index) => {
         return `{ key: '${index}', icon: 'TODO', name: 'TODO', title: 'TODO', ariaLabel: 'TODO' }`
       })
@@ -355,7 +326,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name.includes('MessageBar')) {
       fluentType = FluentComponentType.MessageBar
-      
+
       const messageStringTag = childTags.find(child => child.name === 'String-message')
       if (messageStringTag) {
         childTags = [messageStringTag]
@@ -384,12 +355,12 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
         properties.push({ name: 'isWide', value: 'true', notStringValue: true })
       }
       if (node.name.includes('Condensed')) {
-        properties.push({ name: 'hasCondensedHeadline', value: 'true', notStringValue: true })        
+        properties.push({ name: 'hasCondensedHeadline', value: 'true', notStringValue: true })
       }
       if (node.name.includes('Illustration')) {
-        properties.push({ name: 'illustrationImage', value: '{ src: \'TODO\', alt: \'TODO\' }', notStringValue: true })        
+        properties.push({ name: 'illustrationImage', value: '{ src: \'TODO\', alt: \'TODO\' }', notStringValue: true })
       }
-    
+
       const bodyContainerTag = childTags.find(child => child.name === 'Body-content') ?? childTags.find(child => child.name === 'Body')?.children.find(child => child.name === 'Body-content')
       if (bodyContainerTag) {
         const headerLargeTag = bodyContainerTag.children.find(child => child.name === 'Header-large')
@@ -442,7 +413,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       }
 
       parseFigmaText(childTags, 'String-description', properties, 'description')
-      
+
       if (node.variantProperties) {
         if (node.variantProperties['Indeterminate'] === 'False') {
           properties.push({ name: 'percentComplete', value: '0.2', notStringValue: true })
@@ -479,7 +450,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name === 'ActivityItem') {
       fluentType = FluentComponentType.ActivityItem
-      
+
       const stringContainer = childTags.find(child => child.name === 'String-container')
       if (stringContainer) {
         parseFigmaText(stringContainer.children, 'String-activityDescription', properties, 'activityDescription')
@@ -547,7 +518,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       }
     }
   }
-  
+
   const tag: Tag = {
     name: isImg ? 'img' : node.name,
     isText,
@@ -650,13 +621,13 @@ const parseFigmaList = (node: InstanceNode, childTags: Tag[], properties: Proper
   headerContainerTag?.children.forEach(columnContainerTag => {
     columnContainerTag?.children.forEach(columnComponentTag => {
       if (columnComponentTag.name.includes('Cell-Icon')) {
-        columnStrings.push(`{ key: 'column${columnStrings.length}', name: 'TODO', iconName: 'TODO', isIconOnly: true, fieldName: 'TODO' },`)            
+        columnStrings.push(`{ key: 'column${columnStrings.length}', name: 'TODO', iconName: 'TODO', isIconOnly: true, fieldName: 'TODO' },`)
       }
       if (columnComponentTag.name.includes('ColumnHeader')) {
         let columnName = 'TODO'
         const stringContainerTag = columnComponentTag.children.find(child => child.name === 'String-container' || child.name === 'String-icon-container')
         columnName = stringContainerTag?.children.find(child => child.isText)?.textCharacters ?? 'TODO'
-        columnStrings.push(`{ key: 'column${columnStrings.length}', name: '${columnName}', fieldName: '${kebabize(columnName)}' },`)            
+        columnStrings.push(`{ key: 'column${columnStrings.length}', name: '${columnName}', fieldName: '${kebabize(columnName)}' },`)
       }
     })
   })
@@ -682,6 +653,68 @@ const parseFigmaNav = (node: InstanceNode, childTags: Tag[], properties: Propert
   }
 
   properties.push({ name: 'groups', value: `{ links: [${linkStrings.join(' ')}] }`, notStringValue: true })
+}
+
+const parseFigmaStack = (node: FrameNode, properties: Property[], variables: {[key: string]: string}) => {
+  const stackTokens: {childrenGap?: number, paddingLeft?: number, paddingRight?: number, paddingBottom?: number, paddingTop?: number } = {};
+  const {itemSpacing, paddingLeft, paddingRight, paddingBottom, paddingTop} = node;
+  if(itemSpacing !== 0) {
+    stackTokens.childrenGap = itemSpacing;
+  }
+
+  if(paddingLeft !== 0) {
+    stackTokens.paddingLeft = paddingLeft;
+  }
+  if(paddingRight !== 0) {
+    stackTokens.paddingRight = paddingRight;
+  }
+  if(paddingBottom !== 0) {
+    stackTokens.paddingBottom = paddingBottom;
+  }
+  if(paddingTop !== 0) {
+    stackTokens.paddingTop = paddingTop;
+  }
+
+
+  const tokensStringValue = JSON5.stringify(stackTokens, null, 4).replace('}', '  }')
+  if (tokensStringValue !== '{  }') {
+    const nodeName = node.name.replaceAll(' ', '');
+    const tokensVarName = smallCamel(`${nodeName}StackTokens`)
+    properties.push({name: 'tokens', value: tokensVarName, notStringValue: true});
+    variables[tokensVarName] = tokensStringValue
+  }
+
+  const isHorizontal = node.layoutMode === 'HORIZONTAL';
+
+  if (node.primaryAxisAlignItems) {
+    let value = '';
+    if (node.primaryAxisAlignItems == 'SPACE_BETWEEN') {
+      value = 'space-between';
+    } else if (node.primaryAxisAlignItems == 'CENTER') {
+      value = 'center';
+    } else if (node.primaryAxisAlignItems == 'MIN') {
+      value = 'start';
+    } else if (node.primaryAxisAlignItems == 'MAX') {
+      value = 'end';
+    }
+    properties.push({name: `${isHorizontal? 'horizontal' : 'vertical'}Align`, value: value});
+  }
+
+  if (node.counterAxisAlignItems) {
+    let value = '';
+    if (node.counterAxisAlignItems == 'CENTER') {
+      value = 'center';
+    } else if (node.counterAxisAlignItems == 'MIN') {
+      value = 'start';
+    } else if (node.counterAxisAlignItems == 'MAX') {
+      value = 'end';
+    }
+    properties.push({name: `${isHorizontal? 'vertical' : 'horizontal'}Align`, value: value});
+  }
+
+  if (isHorizontal) {
+    properties.push({ name: 'horizontal', value: null});
+  }
 }
 
 const getCommandBarItemProps = (containerTag: Tag): string => {
