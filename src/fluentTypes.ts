@@ -34,5 +34,7 @@ export enum FluentComponentType {
   Slider = 'Slider',
   Rating = 'Rating',
   Separator = 'Separator',
-  Stack = 'Stack',
+  Stack = 'Stack'
 }
+
+export const fluentNames = Object.keys(FluentComponentType)

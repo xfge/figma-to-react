@@ -271,7 +271,7 @@ export const parseCommandbar = (node: InstanceNode, tag: Tag) => {
   tag.children = []
 }
 
-export const parsePivot = (node: InstanceNode, tag: Tag) => {
+export const parsePivotItem = (node: InstanceNode, tag: Tag) => {
   tag.fluentType = FluentComponentType.PivotItem
   const containerTag = tag.children.find((child) => child.node.name === 'String-auto-layout' || child.node.name === 'String-icon-auto-layout')
   if (containerTag) {
@@ -282,6 +282,10 @@ export const parsePivot = (node: InstanceNode, tag: Tag) => {
     }
   }
   tag.children = []
+}
+
+export const parsePivot = (tag: Tag) => {
+  tag.fluentType = FluentComponentType.Pivot
 }
 
 export const parseDatePicker = (node: InstanceNode, tag: Tag) => {
@@ -527,6 +531,11 @@ export const parseLabel = (node: InstanceNode, tag: Tag) => {
     tag.isText = true
     tag.textCharacters = stringChild.textCharacters
   }
+  tag.children = []
+}
+
+export const parseSlider = (tag: Tag) => {
+  tag.fluentType = FluentComponentType.Slider
   tag.children = []
 }
 
