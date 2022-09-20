@@ -1,6 +1,6 @@
 import { kebabize } from './utils/stringUtils'
 import { CSSData } from './getCssDataForTag'
-import { Tag } from './buildTagTree'
+import { Tag } from './types'
 
 export type CssStyle = 'css' | 'styled-components'
 

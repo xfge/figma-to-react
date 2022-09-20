@@ -18,5 +18,5 @@ export type Tag = {
   node: SceneNode
   isComponent?: boolean
   fluentType?: FluentComponentType
-  variables?: { [key: string]: string }
+  variables: { [key: string]: string }
 }

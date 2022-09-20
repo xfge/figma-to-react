@@ -1,5 +1,5 @@
 import { capitalizeFirstLetter, kebabize } from './utils/stringUtils'
-import { Tag } from './buildTagTree'
+import { Tag } from './types'
 
 type CssStyle = 'css' | 'styled-components'
 
@@ -73,13 +73,15 @@ function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): stri
   return ''
 }
 
-function buildVariableString(variables: {[key:string]: string} | undefined): string {
-  if(!variables) {
-    return '';
+function buildVariableString(variables: { [key: string]: string } | undefined): string {
+  if (!variables) {
+    return ''
   }
-  return Object.keys(variables).map(vname => {
-    return `  const ${vname} = ${variables[vname]}\n`;
-  }).join('\n');
+  return Object.keys(variables)
+    .map((vname) => {
+      return `  const ${vname} = ${variables[vname]}\n`
+    })
+    .join('\n')
 }
 
 function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
@@ -101,7 +103,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 }
 
 export function buildCode(tag: Tag, css: CssStyle): string {
-  const variables = getAllVariables(tag);
+  const variables = getAllVariables(tag)
   return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.VFC = () => {
 ${buildVariableString(variables)}
   return (
@@ -110,10 +112,10 @@ ${buildJsxString(tag, css, 0)}
 }`
 }
 
-function getAllVariables(tag: Tag): {[key: string]: string} {
-  const v  = {...tag.variables};
-  if(tag.children) {
-    tag.children.forEach(c => Object.assign(v, getAllVariables(c)));
+function getAllVariables(tag: Tag): { [key: string]: string } {
+  const v = { ...tag.variables }
+  if (tag.children) {
+    tag.children.forEach((c) => Object.assign(v, getAllVariables(c)))
   }
-  return v;
+  return v
 }
