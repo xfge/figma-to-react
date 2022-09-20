@@ -1,7 +1,15 @@
-import {Property, Tag} from "../buildTagTree";
-import {capitalizeFirstLetter, smallCamel} from "../utils/stringUtils";
+import { capitalizeFirstLetter, smallCamel } from '../utils/stringUtils'
+import { Property, Tag } from '../types'
 
-export const parseFigmaVariant = (node: InstanceNode, variantName: string, variantValue: string, properties: Property[], propName: string, propValue: string | null, notStringValue?: boolean) => {
+export const parseFigmaVariant = (
+  node: InstanceNode,
+  variantName: string,
+  variantValue: string,
+  properties: Property[],
+  propName: string,
+  propValue: string | null,
+  notStringValue?: boolean
+) => {
   if (node.variantProperties && node.variantProperties[variantName] === variantValue) {
     properties.push({ name: propName, value: propValue, notStringValue: notStringValue })
   }
@@ -12,12 +20,12 @@ export const parseCommonFigmaVariants = (node: InstanceNode, properties: Propert
 }
 
 const getItemString = (properties: Property[]): string => {
-  return properties.length > 0 ? `{ ${properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'},`).join(' ')} },` : ''
+  return properties.length > 0 ? `{ ${properties.map((prop) => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'},`).join(' ')} },` : ''
 }
 
-export const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], propName: string, nodeName: string, variables: {[key: string]: string}) => {
+export const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], propName: string, nodeName: string, variables: { [key: string]: string }) => {
   const optionStrings: string[] = []
-  childTags.forEach(childTag => {
+  childTags.forEach((childTag) => {
     if (childTag.node.type === 'FRAME') {
       childTag.children.forEach((optionTag) => {
         optionStrings.push(getItemString(optionTag.properties))
@@ -28,6 +36,6 @@ export const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], 
   })
 
   const itemsVarName = `${smallCamel(nodeName)}${capitalizeFirstLetter(propName)}`
-  properties.push({ name: propName, value: itemsVarName, notStringValue: true})
+  properties.push({ name: propName, value: itemsVarName, notStringValue: true })
   variables[itemsVarName] = `[${optionStrings.join(' ')}]`
 }
