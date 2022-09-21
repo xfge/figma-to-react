@@ -44,117 +44,113 @@ export const parseFigmaNode = (node: SceneNode, tag: Tag) => {
   // InstanceNode is assumed as a common component from Fluent UI
   if (node.type === 'INSTANCE') {
     // Use the main component to infer the Fluent component type
-    if (node.mainComponent) {
-      switch (getFluentType(node.mainComponent)) {
-        case FluentComponentType.PrimaryButton:
-        case FluentComponentType.DefaultButton:
-        case FluentComponentType.ActionButton:
-        case FluentComponentType.IconButton:
-          parseButton(node, tag)
-          break
-        case FluentComponentType.Link:
-          parseLink(node, tag)
-          break
-        case FluentComponentType.OverflowSet:
-          parseOverflowSet(node, tag)
-          break
-        case FluentComponentType.SearchBox:
-          parseSearchBox(node, tag)
-          break
-        case FluentComponentType.TextField:
-          parseTextField(node, tag)
-          break
-        case FluentComponentType.Dropdown:
-          parseDropdown(node, tag)
-          break
-        case FluentComponentType.SpinButton:
-          parseSpinButton(node, tag)
-          break
-        case FluentComponentType.CheckBox:
-          parseCheckbox(node, tag)
-          break
-        case FluentComponentType.ChoiceGroupOption:
-          parseRadioButton(node, tag)
-          break
-        case FluentComponentType.ChoiceGroup:
-          parseChoiceGroup(node, tag)
-          break
-        case FluentComponentType.Toggle:
-          parseToggle(node, tag)
-          break
-        case FluentComponentType.Facepile:
-          parseFacePile(node, tag)
-          break
-        case FluentComponentType.Persona:
-          parsePersona(node, tag)
-          break
-        case FluentComponentType.CommandBar:
-          parseCommandbar(node, tag)
-          break
-        case FluentComponentType.PivotItem:
-          parsePivotItem(node, tag)
-          break
-        case FluentComponentType.Pivot:
-          parsePivot(tag)
-          break
-        case FluentComponentType.DatePicker:
-          parseDatePicker(node, tag)
-          break
-        case FluentComponentType.NormalPeoplePicker:
-          parsePeoplePicker(node, tag)
-          break
-        case FluentComponentType.TagPicker:
-          parseTagPicker(node, tag)
-          break
-        case FluentComponentType.DetailsList:
-          parseDetailsList(node, tag)
-          break
-        case FluentComponentType.GroupedList:
-          parseGroupedList(node, tag)
-          break
-        case FluentComponentType.Breadcrumb:
-          parseBreadcrumb(node, tag)
-          break
-        case FluentComponentType.Nav:
-          parseNav(node, tag)
-          break
-        case FluentComponentType.MessageBar:
-          parseMessageBar(node, tag)
-          break
-        case FluentComponentType.TeachingBubble:
-          parseTeachingBubble(node, tag)
-          break
-        case FluentComponentType.ProgressIndicator:
-          parseProgressIndicator(node, tag)
-          break
-        case FluentComponentType.Spinner:
-          parseSpinner(node, tag)
-          break
-        case FluentComponentType.ActivityItem:
-          parseActivityItem(node, tag)
-          break
-        case FluentComponentType.Label:
-          parseLabel(node, tag)
-          break
-        case FluentComponentType.Slider:
-          parseSlider(tag)
-          break
-        case FluentComponentType.Rating:
-          parseRating(node, tag)
-          break
-        case FluentComponentType.Separator:
-          parseSeparator(node, tag)
-          break
-        default:
-          break
-      }
+    switch (guessFluentType(node.mainComponent?.description)) {
+      case FluentComponentType.PrimaryButton:
+      case FluentComponentType.DefaultButton:
+      case FluentComponentType.ActionButton:
+      case FluentComponentType.IconButton:
+        parseButton(node, tag)
+        break
+      case FluentComponentType.Link:
+        parseLink(node, tag)
+        break
+      case FluentComponentType.OverflowSet:
+        parseOverflowSet(node, tag)
+        break
+      case FluentComponentType.SearchBox:
+        parseSearchBox(node, tag)
+        break
+      case FluentComponentType.TextField:
+        parseTextField(node, tag)
+        break
+      case FluentComponentType.Dropdown:
+        parseDropdown(node, tag)
+        break
+      case FluentComponentType.SpinButton:
+        parseSpinButton(node, tag)
+        break
+      case FluentComponentType.CheckBox:
+        parseCheckbox(node, tag)
+        break
+      case FluentComponentType.ChoiceGroupOption:
+        parseRadioButton(node, tag)
+        break
+      case FluentComponentType.ChoiceGroup:
+        parseChoiceGroup(node, tag)
+        break
+      case FluentComponentType.Toggle:
+        parseToggle(node, tag)
+        break
+      case FluentComponentType.Facepile:
+        parseFacePile(node, tag)
+        break
+      case FluentComponentType.Persona:
+        parsePersona(node, tag)
+        break
+      case FluentComponentType.CommandBar:
+        parseCommandbar(node, tag)
+        break
+      case FluentComponentType.PivotItem:
+        parsePivotItem(node, tag)
+        break
+      case FluentComponentType.Pivot:
+        parsePivot(tag)
+        break
+      case FluentComponentType.DatePicker:
+        parseDatePicker(node, tag)
+        break
+      case FluentComponentType.NormalPeoplePicker:
+        parsePeoplePicker(node, tag)
+        break
+      case FluentComponentType.TagPicker:
+        parseTagPicker(node, tag)
+        break
+      case FluentComponentType.DetailsList:
+        parseDetailsList(node, tag)
+        break
+      case FluentComponentType.GroupedList:
+        parseGroupedList(node, tag)
+        break
+      case FluentComponentType.Breadcrumb:
+        parseBreadcrumb(node, tag)
+        break
+      case FluentComponentType.Nav:
+        parseNav(node, tag)
+        break
+      case FluentComponentType.MessageBar:
+        parseMessageBar(node, tag)
+        break
+      case FluentComponentType.TeachingBubble:
+        parseTeachingBubble(node, tag)
+        break
+      case FluentComponentType.ProgressIndicator:
+        parseProgressIndicator(node, tag)
+        break
+      case FluentComponentType.Spinner:
+        parseSpinner(node, tag)
+        break
+      case FluentComponentType.ActivityItem:
+        parseActivityItem(node, tag)
+        break
+      case FluentComponentType.Label:
+        parseLabel(node, tag)
+        break
+      case FluentComponentType.Slider:
+        parseSlider(tag)
+        break
+      case FluentComponentType.Rating:
+        parseRating(node, tag)
+        break
+      case FluentComponentType.Separator:
+        parseSeparator(node, tag)
+        break
+      default:
+        break
     }
   }
 }
 
-const getFluentType = (node: ComponentNode): FluentComponentType | undefined => {
-  const description = node.description
-
+const guessFluentType = (description?: string): FluentComponentType | undefined => {
   if (description) {
     const match = description.match(/Fluent component: (.*)/)
 
