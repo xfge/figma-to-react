@@ -1,11 +1,9 @@
 import * as React from 'react'
 import * as ReactDom from 'react-dom'
-import { CssStyle } from './buildCssString'
-import { UnitType } from './buildSizeStringByUnit'
+import { CssStyle, UnitType } from 'figma-tree-parser'
 import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
 import Spacer from './ui/Spacer'
-import UserComponentSettingList from './ui/UserComponentSettingList'
 import { UserComponentSetting } from './userComponentSetting'
 
 function escapeHtml(str: string) {

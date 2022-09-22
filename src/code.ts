@@ -1,11 +1,8 @@
 import { STORAGE_KEYS } from './storageKeys'
 import { messageTypes } from './messagesTypes'
-import { UnitType } from './buildSizeStringByUnit'
 import { modifyTreeForComponent } from './modifyTreeForComponent'
-import { buildCode } from './buildCode'
-import { buildTagTree } from './buildTagTree'
-import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
+import { buildTagTree, CssStyle, buildCssString, buildCode, UnitType } from 'figma-tree-parser'
 
 figma.showUI(__html__, { width: 500, height: 500 })
 
@@ -32,6 +29,7 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
   const userComponentSettings: UserComponentSetting[] = (await figma.clientStorage.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)) || []
 
+  console.log(node)
   const originalTagTree = buildTagTree(node, unitType)
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')

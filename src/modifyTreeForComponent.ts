@@ -1,6 +1,6 @@
 import { STORAGE_KEYS } from './storageKeys'
 import { UserComponentSetting } from './userComponentSetting'
-import { Tag } from './types'
+import { Tag } from 'figma-tree-parser'
 
 type ComponentSetting = {
   name: string

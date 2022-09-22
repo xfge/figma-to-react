@@ -1,6 +1,6 @@
-import { CssStyle } from './buildCssString'
-import { UnitType } from './buildSizeStringByUnit'
+import { CssStyle, UnitType } from 'figma-tree-parser'
 import { UserComponentSetting } from './userComponentSetting'
+
 export type messageTypes =
   | { type: 'notify-copy-success' }
   | { type: 'new-css-style-set'; cssStyle: CssStyle }
